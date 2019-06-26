@@ -1,213 +1,212 @@
-const fs = require('fs'); // eslint-disable-line
-const PATH = 'components/{{pascalCase name}}';
-const REACT_PATH = 'adapters/react/{{pascalCase name}}React';
-const VUE_PATH =  'adapters/vue/{{pascalCase name}}Vue';
-const PLOP_PATH = 'plopTemplates/Component';
-const PLOP_REACT = 'plopTemplates/reactAdapters';
-const PLOP_VUE = 'plopTemplates/vueAdapters';
+const fs = require("fs") // eslint-disable-line
+const PATH = "components/{{pascalCase name}}"
+const REACT_PATH = "adapters/react/{{pascalCase name}}React"
+const VUE_PATH = "adapters/vue/{{pascalCase name}}Vue"
+const PLOP_PATH = "plopTemplates/Component"
+const PLOP_REACT = "plopTemplates/reactAdapters"
+const PLOP_VUE = "plopTemplates/vueAdapters"
 
 const reactActions = [
 	{
-		type: 'add',
+		type: "add",
 		path: `${REACT_PATH}/src/{{pascalCase name}}.tsx`,
-		templateFile: `${PLOP_REACT}/src/Component.tsx.hbs`
+		templateFile: `${PLOP_REACT}/src/Component.tsx.hbs`,
 	},
 	{
-		type: 'add',
+		type: "add",
 		path: `${REACT_PATH}/src/I{{pascalCase name}}.tsx`,
-		templateFile: `${PLOP_REACT}/src/IComponent.tsx.hbs`
+		templateFile: `${PLOP_REACT}/src/IComponent.tsx.hbs`,
 	},
 	{
-		type: 'add',
+		type: "add",
 		path: `${REACT_PATH}/src/index.tsx`,
-		templateFile: `${PLOP_REACT}/src/index.tsx.hbs`
+		templateFile: `${PLOP_REACT}/src/index.tsx.hbs`,
 	},
 	{
-		type: 'add',
+		type: "add",
 		path: `${REACT_PATH}/.babelrc`,
-		templateFile: `${PLOP_REACT}/.babelrc.hbs`
+		templateFile: `${PLOP_REACT}/.babelrc.hbs`,
 	},
 	{
-		type: 'add',
+		type: "add",
 		path: `${REACT_PATH}/package.json`,
-		templateFile: `${PLOP_REACT}/package.json.hbs`
+		templateFile: `${PLOP_REACT}/package.json.hbs`,
 	},
 	{
-		type: 'add',
+		type: "add",
 		path: `${REACT_PATH}/{{pascalCase name}}.stories.tsx`,
-		templateFile: `${PLOP_REACT}/index.stories.tsx.hbs`
+		templateFile: `${PLOP_REACT}/index.stories.tsx.hbs`,
 	},
 	{
-		type: 'add',
+		type: "add",
 		path: `${REACT_PATH}/tsconfig.json`,
-		templateFile: `${PLOP_REACT}/tsconfig.json.hbs`
+		templateFile: `${PLOP_REACT}/tsconfig.json.hbs`,
+	},
+	{
+		type: "add",
+		path: `${REACT_PATH}/README.md`,
+		templateFile: `${PLOP_REACT}/README.md.hbs`,
 	},
 	//append the file into the www package json file at the top of the list
 	{
-		type: 'append',
-		path: 'www/package.json',
+		type: "append",
+		path: "www/package.json",
 		// Pattern tells plop where in the file to inject the template
 		pattern: `"@mdx-js\/react"\: "\^1\.0\.0-rc\.5",`,
 		template: `		"@rhythm-ui/{{kebabCase name}}-react": "^1.0.0",`,
-	}
-];
+	},
+]
 
 const vueActions = [
 	{
-		type: 'add',
+		type: "add",
 		path: `${VUE_PATH}/{{pascalCase name}}Vue.ts`,
-		templateFile: `${PLOP_VUE}/readme.md.hbs`
-	}
-];
+		templateFile: `${PLOP_VUE}/readme.md.hbs`,
+	},
+]
 
 const isNotEmpty = name => {
-	return ( value ) => {
-		return value.length === 0 ? `${name} is required` : true;
+	return value => {
+		return value.length === 0 ? `${name} is required` : true
 	}
-};
+}
 
 const checkFile = file => {
 	try {
-		fs.accessSync(file, fs.constants.R_OK);
-		return true;
+		fs.accessSync(file, fs.constants.R_OK)
+		return true
 	} catch (err) {
-		return false;
+		return false
 	}
-};
+}
 
 const checkComponent = () => {
-	const choices = [];
-	fs
-		.readdirSync('./components')
-		.forEach(file => {
-			if (!checkFile(`adapters/react/${file}React`)) {
-				choices.push(file)
-			}
-		});
+	const choices = []
+	fs.readdirSync("./components").forEach(file => {
+		if (!checkFile(`adapters/react/${file}React`)) {
+			choices.push(file)
+		}
+	})
 	return choices
-};
+}
 
-const ensureRui = text => `rui ${text.replace(/Rui/gi, "")}`;
+const ensureRui = text => `rui ${text.replace(/Rui/gi, "")}`
 
 module.exports = plop => {
-    plop.setGenerator('component', {
-        description: 'create a new component',
+	plop.setGenerator("component", {
+		description: "create a new component",
 
-        //prompts are user inputs that provided as arguments to the templates
-        prompts: [
-            {
-                // Raw text input
-                type: 'input',
-                // Variable name for this input
-                name: 'name',
-                // Prompt to display on command line
-                message: 'What is your component name?',
-                // validate the field is not empty
-                validate: isNotEmpty( 'name'),
-				//format the component to have Rui
-				filter: ensureRui
-            },
-            {
-                type: 'list',
-                name: 'adapter',
-                message: 'Do you also need an adapter?',
-                choices: ['Not yet', 'React'],
-            },
-        ],
-        actions: data => {
-            let actions = [];
-            actions = actions.concat([
-                {
-                    type: 'add',
-                    path: `${PATH}/tsconfig.json`,
-                    templateFile: `${PLOP_PATH}/tsconfig.json.hbs`
-                },
-                {
-                    type: 'add',
-                    path: `${PATH}/.babelrc`,
-                    templateFile: `${PLOP_PATH}/.babelrc.hbs`
-                },
-                {
-                    type: 'add',
-                    path: `${PATH}/package.json`,
-                    templateFile: `${PLOP_PATH}/package.json.hbs`
-                },
-                {
-                    type: 'add',
-                    path: `${PATH}/readme.md`,
-                    templateFile: `${PLOP_PATH}/readme.md.hbs`
-                },
-                //src files - component, css and index
-                {
-                    type: 'add',
-                    path: `${PATH}/src/{{pascalCase name}}.ts`,
-                    templateFile: `${PLOP_PATH}/src/Component.ts.hbs`
-                },
-                {
-                    type: 'add',
-                    path: `${PATH}/src/{{pascalCase name}}.css.ts`,
-                    templateFile: `${PLOP_PATH}/src/Component.css.ts.hbs`
-                },
-                {
-                    type: 'add',
-                    path: `${PATH}/src/index.ts`,
-                    templateFile: `${PLOP_PATH}/src/index.ts.hbs`
-                },
-				{
-					type: 'add',
-					path: `${PATH}/tests/{{pascalCase name}}.test.ts`,
-					templateFile: `${PLOP_PATH}/tests/Component.test.ts.hbs`
-				},
-				{
-					type: 'add',
-					path: `${PATH}/tests/tsconfig.json`,
-					templateFile: `${PLOP_PATH}/tests/tsconfig.json.hbs`
-				},
-            ]);
-            if (data.adapter === 'React' || data.adapter === 'Both') {
-                actions = actions.concat(reactActions)
-            }
-            if (data.adapter === 'Vue' || data.adapter === 'Both') {
-                actions = actions.concat(vueActions)
-            }
-            return actions
-        },
-    });
-
-    plop.setGenerator('adapter', {
-        description: 'Create an adapter that wraps the html component',
-
-        //prompts are user inputs that provided as arguments to the templates
-        prompts: [
+		//prompts are user inputs that provided as arguments to the templates
+		prompts: [
 			{
-				type: 'list',
-				name: 'name',
-				message: 'Please chose your component',
-				choices: () => {
-					return checkComponent()
+				// Raw text input
+				type: "input",
+				// Variable name for this input
+				name: "name",
+				// Prompt to display on command line
+				message: "What is your component name?",
+				// validate the field is not empty
+				validate: isNotEmpty("name"),
+				//format the component to have Rui
+				filter: ensureRui,
+			},
+			{
+				type: "list",
+				name: "adapter",
+				message: "Do you also need an adapter?",
+				choices: ["Not yet", "React"],
+			},
+		],
+		actions: data => {
+			let actions = []
+			actions = actions.concat([
+				{
+					type: "add",
+					path: `${PATH}/tsconfig.json`,
+					templateFile: `${PLOP_PATH}/tsconfig.json.hbs`,
+				},
+				{
+					type: "add",
+					path: `${PATH}/.babelrc`,
+					templateFile: `${PLOP_PATH}/.babelrc.hbs`,
+				},
+				{
+					type: "add",
+					path: `${PATH}/package.json`,
+					templateFile: `${PLOP_PATH}/package.json.hbs`,
+				},
+				{
+					type: "add",
+					path: `${PATH}/readme.md`,
+					templateFile: `${PLOP_PATH}/readme.md.hbs`,
+				},
+				//src files - component, css and index
+				{
+					type: "add",
+					path: `${PATH}/src/{{pascalCase name}}.ts`,
+					templateFile: `${PLOP_PATH}/src/Component.ts.hbs`,
+				},
+				{
+					type: "add",
+					path: `${PATH}/src/{{pascalCase name}}.css.ts`,
+					templateFile: `${PLOP_PATH}/src/Component.css.ts.hbs`,
+				},
+				{
+					type: "add",
+					path: `${PATH}/src/index.ts`,
+					templateFile: `${PLOP_PATH}/src/index.ts.hbs`,
+				},
+				{
+					type: "add",
+					path: `${PATH}/tests/{{pascalCase name}}.test.ts`,
+					templateFile: `${PLOP_PATH}/tests/Component.test.ts.hbs`,
+				},
+				{
+					type: "add",
+					path: `${PATH}/tests/tsconfig.json`,
+					templateFile: `${PLOP_PATH}/tests/tsconfig.json.hbs`,
+				},
+			])
+			if (data.adapter === "React" || data.adapter === "Both") {
+				actions = actions.concat(reactActions)
+			}
+			if (data.adapter === "Vue" || data.adapter === "Both") {
+				actions = actions.concat(vueActions)
+			}
+			return actions
+		},
+	})
+
+	plop.setGenerator("adapter", {
+		description: "Create an adapter that wraps the html component",
+
+		//prompts are user inputs that provided as arguments to the templates
+		prompts: [
+			{
+				type: "list",
+				name: "name",
+				message: "Please chose your component",
+				choices: () => {
+					return checkComponent()
 				},
 			},
-            {
-                type: 'list',
-                name: 'adapter',
-                message: 'Please chose an adapter',
-				choices: ['React'],
-            },
-        ],
+			{
+				type: "list",
+				name: "adapter",
+				message: "Please chose an adapter",
+				choices: ["React"],
+			},
+		],
 
-        actions: data => {
-            let actions = [];
-            if (data.adapter === 'React' || data.adapter === 'Both') {
-                actions = actions.concat(reactActions)
-            }
-            if (data.adapter === 'Vue' || data.adapter === 'Both') {
-                actions = actions.concat(vueActions)
-            }
-            return actions
-        },
-    })
-};
-
-
-
-
+		actions: data => {
+			let actions = []
+			if (data.adapter === "React" || data.adapter === "Both") {
+				actions = actions.concat(reactActions)
+			}
+			if (data.adapter === "Vue" || data.adapter === "Both") {
+				actions = actions.concat(vueActions)
+			}
+			return actions
+		},
+	})
+}
